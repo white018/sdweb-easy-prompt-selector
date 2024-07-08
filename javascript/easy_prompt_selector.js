@@ -270,15 +270,16 @@ class EasyPromptSelector {
 
         const toNegative = this.toNegative || e.metaKey || e.ctrlKey
         if (this.hasTag(value, toNegative)) {
-          this.removeTag(value, this.toNegative || e.metaKey || e.ctrlKey)
+          this.removeTag(value, toNegative)
         } else {
-          this.addTag(value, this.toNegative || e.metaKey || e.ctrlKey)
+          this.addTag(value, toNegative)
         }
       },
       onRightClick: (e) => {
         e.preventDefault();
+        const toNegative = this.toNegative || e.metaKey || e.ctrlKey
 
-        this.removeTag(value, this.toNegative || e.metaKey || e.ctrlKey)
+        this.removeTag(value, this.toNegative)
       },
       color
     })
