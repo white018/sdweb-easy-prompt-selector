@@ -243,8 +243,11 @@ class EasyPromptSelector {
         const values = tags[key]
         const randomKey = `${prefix}:${key}`
 
-        if (typeof values === 'string') { return this.renderTagButton(key, values, 'secondary') }
-
+        if (typeof values === 'string') {
+          return this.renderTagButton(key, values, 'secondary')
+        } else if (Object.hasOwn(values, "positive") && Object.hasOwn(values, "negative")) {
+          return this.renderTagButton(key, values.positive, 'secondary', values.negative)
+        }
         const fields = EPSElementBuilder.tagFields()
         fields.style.flexDirection = 'column'
 
@@ -262,7 +265,7 @@ class EasyPromptSelector {
     }
   }
 
-  renderTagButton(title, value, color = 'primary') {
+  renderTagButton(title, value, color = 'primary', negative = undefined) {
     return EPSElementBuilder.tagButton({
       title,
       onClick: (e) => {
@@ -271,8 +274,10 @@ class EasyPromptSelector {
         const toNegative = this.toNegative || e.metaKey || e.ctrlKey
         if (this.hasTag(value, toNegative)) {
           this.removeTag(value, toNegative)
+          negative && this.removeTag(negative, !toNegative)
         } else {
           this.addTag(value, toNegative)
+          negative && this.addTag(negative, !toNegative)
         }
       },
       onRightClick: (e) => {
@@ -280,6 +285,7 @@ class EasyPromptSelector {
         const toNegative = this.toNegative || e.metaKey || e.ctrlKey
 
         this.removeTag(value, this.toNegative)
+        negative && this.removeTag(negative, !toNegative)
       },
       color
     })
