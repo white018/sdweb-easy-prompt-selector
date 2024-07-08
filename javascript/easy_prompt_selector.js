@@ -114,13 +114,14 @@ class EPSElementBuilder {
 
 class EasyPromptSelector {
   PATH_FILE = 'tmp/easyPromptSelector.txt'
+  PATH_FILE = 'styles.csv'
   AREA_ID = 'easy-prompt-selector'
   SELECT_ID = 'easy-prompt-selector-select'
   CONTENT_ID = 'easy-prompt-selector-content'
   TO_NEGATIVE_PROMPT_ID = 'easy-prompt-selector-to-negative-prompt'
 
-  constructor(yaml, gradioApp) {
-    this.yaml = yaml
+  constructor(parseCSV, gradioApp) {
+    this.parseCSV = parseCSV
     this.gradioApp = gradioApp
     this.visible = false
     this.toNegative = false
@@ -151,18 +152,27 @@ class EasyPromptSelector {
   async parseFiles() {
     const text = await this.readFile(this.PATH_FILE);
     if (text === '') { return {} }
+    const data = parseCSV(text)
+    data.shift()  // Remove header
 
-    const paths = text.split(/\r\n|\n/)
-
-    const tags = {}
-    for (const path of paths) {
-      const filename = path.split('/').pop().split('.').slice(0, -1).join('.')
-      const data = await this.readFile(path)
-      yaml.loadAll(data, function (doc) {
-        tags[filename] = doc
-      })
-    }
-
+    const tags = { others: {} }
+    data.forEach((row) => {
+      const [name, positive, negative] = row
+      let t = tags
+      if (name.includes('-')) {
+        const sections = name.split('-')
+        sections.forEach((section) => {
+          if (!Object.hasOwn(t, section)) {
+            t[section] = {}
+          }
+          t = t[section]
+        })
+      } else {
+        t = tags.others
+      }
+      t.positive = positive
+      negative && (t.negative = negative)
+    })
     return tags
   }
 
@@ -245,7 +255,7 @@ class EasyPromptSelector {
 
         if (typeof values === 'string') {
           return this.renderTagButton(key, values, 'secondary')
-        } else if (Object.hasOwn(values, "positive") && Object.hasOwn(values, "negative")) {
+        } else if (Object.hasOwn(values, "positive") || Object.hasOwn(values, "negative")) {
           return this.renderTagButton(key, values.positive, 'secondary', values.negative)
         }
         const fields = EPSElementBuilder.tagFields()
@@ -333,8 +343,8 @@ class EasyPromptSelector {
 }
 
 onUiLoaded(async () => {
-  yaml = window.jsyaml
-  const easyPromptSelector = new EasyPromptSelector(yaml, gradioApp())
+  parse = window.parse
+  const easyPromptSelector = new EasyPromptSelector(parse, gradioApp())
 
   const button = EPSElementBuilder.openButton({
     onClick: () => {
