@@ -7,7 +7,11 @@ import gradio as gr
 import modules.scripts as scripts
 from modules.scripts import AlwaysVisible, basedir
 from modules import shared
-from scripts.setup import write_filename_list
+import importlib
+import sys
+sys.path.append(str(Path(__file__).parent.parent.parent))
+setup = importlib.import_module("sdweb-easy-prompt-selector.scripts.setup")
+write_filename_list = setup.write_filename_list
 
 FILE_DIR = Path().absolute()
 BASE_DIR = Path(basedir())
