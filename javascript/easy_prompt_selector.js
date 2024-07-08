@@ -268,7 +268,12 @@ class EasyPromptSelector {
       onClick: (e) => {
         e.preventDefault();
 
-        this.addTag(value, this.toNegative || e.metaKey || e.ctrlKey)
+        const toNegative = this.toNegative || e.metaKey || e.ctrlKey
+        if (this.hasTag(value, toNegative)) {
+          this.removeTag(value, this.toNegative || e.metaKey || e.ctrlKey)
+        } else {
+          this.addTag(value, this.toNegative || e.metaKey || e.ctrlKey)
+        }
       },
       onRightClick: (e) => {
         e.preventDefault();
@@ -282,6 +287,12 @@ class EasyPromptSelector {
   // Util
   changeVisibility(node, visible) {
     node.style.display = visible ? 'flex' : 'none'
+  }
+
+  hasTag(tag, toNegative = false) {
+    const id = toNegative ? 'txt2img_neg_prompt' : 'txt2img_prompt'
+    const textarea = gradioApp().getElementById(id).querySelector('textarea')
+    return textarea.value.includes(tag)
   }
 
   addTag(tag, toNegative = false) {
