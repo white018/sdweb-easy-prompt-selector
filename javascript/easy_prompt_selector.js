@@ -161,6 +161,10 @@ class EasyPromptSelector {
       let t = tags
       if (name.includes('-')) {
         const sections = name.split('-')
+        // 最初だけ1段階深くする
+        t[sections[0]] = t[sections[0]] || {}
+        t = t[sections[0]]
+
         sections.forEach((section) => {
           if (!Object.hasOwn(t, section)) {
             t[section] = {}
@@ -168,7 +172,7 @@ class EasyPromptSelector {
           t = t[section]
         })
       } else {
-        t = tags.others
+        t = tags.others[name] = {}
       }
       t.positive = positive
       negative && (t.negative = negative)
