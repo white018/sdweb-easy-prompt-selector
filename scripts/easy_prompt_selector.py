@@ -119,13 +119,12 @@ class Script(scripts.Script):
         if getattr(p, 'hr_negative_prompt', None): prompts.append([p.hr_negative_prompt, p.all_hr_negative_prompts, 'Input NegativePrompt(Hires)'])
 
         for i in range(len(p.all_prompts)):
-            seed = random.random()
             for [prompt, all_prompts, raw_prompt_param_name] in prompts:
                 if '@' not in prompt: continue
 
                 self.save_prompt_to_pnginfo(p, prompt, raw_prompt_param_name)
 
-                replaced = "".join(replace_template(self.tags, all_prompts[i], seed))
+                replaced = "".join(replace_template(self.tags, all_prompts[i], p.all_seeds[i]))
                 all_prompts[i] = replaced
 
     def save_prompt_to_pnginfo(self, p, prompt, name):
