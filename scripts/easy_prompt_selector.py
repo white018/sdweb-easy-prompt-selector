@@ -3,30 +3,33 @@ import random
 import re
 import yaml
 import gradio as gr
+import csv
 
 import modules.scripts as scripts
 from modules.scripts import AlwaysVisible, basedir
 from modules import shared
 import importlib
 import sys
+from scripts.parse_tag_file import parse_tag_file
 sys.path.append(str(Path(__file__).parent.parent.parent))
 setup = importlib.import_module("sdweb-easy-prompt-selector.scripts.setup")
 write_filename_list = setup.write_filename_list
 
 FILE_DIR = Path().absolute()
 BASE_DIR = Path(basedir())
-TAGS_DIR = BASE_DIR.joinpath('tags')
+TAGS_DIR = BASE_DIR.joinpath('../../')
+
 
 def tag_files():
-    return TAGS_DIR.rglob("*.yml")
+    return TAGS_DIR.rglob("styles.csv")
+
 
 def load_tags():
     tags = {}
     for filepath in tag_files():
         with open(filepath, "r", encoding="utf-8") as file:
-            yml = yaml.safe_load(file)
-            tags[filepath.stem] = yml
-
+            data = list(csv.reader(file))
+            tags = parse_tag_file(data)
     return tags
 
 def find_tag(tags, location):
